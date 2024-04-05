@@ -35,7 +35,7 @@ tee add_miner.sh > /dev/null <<EOF
   echo '#!/bin/bash' > mine\$i.sh
   echo "while true; do" >> mine\$i.sh
   echo "  echo "Mining \$i starting..."" >> mine\$i.sh
-  echo "  ore --rpc https://api.mainnet-beta.solana.com --keypair ~/ore/id\$i.json --priority-fee 1000 mine --threads 4" >> mine\$i.sh
+  echo "  ore --rpc https://api.mainnet-beta.solana.com --keypair ~/ore/id\$i.json --priority-fee 10000 mine --threads 4" >> mine\$i.sh
   echo "  echo "Mining \$i finished."" >> mine\$i.sh
   echo "done" >> mine\$i.sh
   chmod ug+x mine\$i.sh
@@ -57,10 +57,18 @@ chmod ug+x stop_miner.sh
 tee list_addresses.sh > /dev/null <<EOF
   for key in id*.json; do
     echo "Address \$key: "
-    solana address -k \$key
+    solana address -k ${INSTALLATION_DIR}/\$key
   done
 EOF
 chmod ug+x list_addresses.sh
+
+tee check_rewards.sh > /dev/null <<EOF
+  for key in id*.json; do
+    echo "Rewards \$key: "
+    ore --keypair ${INSTALLATION_DIR}/\$key rewards
+  done
+EOF
+chmod ug+x check_rewards.sh
 
 sudo tee /etc/logrotate.d/ore > /dev/null <<EOF
   $INSTALLATION_DIR/miner.log {
