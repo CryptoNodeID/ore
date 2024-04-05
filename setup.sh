@@ -5,15 +5,15 @@ sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 source ~/.profile
 cargo install ore-cli
 echo '#!/bin/bash' > master_miner.sh
-read -p "How many addresses do you want to generate? " NUM
+read -p "How many miner do you want to generate? " NUM
+solana-keygen new -o id.json
+solana address -k id.json
 for ((i=1; i<=$NUM; i++))
 do
-  solana-keygen new -o id$i.json
-  solana address -k id$i.json
   tee mine$i.sh > /dev/null <<EOF
   while true; do
     echo "Mining $i starting..."
-    ore --rpc https://api.mainnet-beta.solana.com --keypair ~/ore/id$i.json --priority-fee 1000 mine --threads 4
+    ore --rpc https://api.mainnet-beta.solana.com --keypair ${INSTALLATION_DIR}/id.json --priority-fee 1000 mine --threads 4
     echo "Mining $i finished."
   done
 EOF
@@ -30,12 +30,10 @@ tee add_miner.sh > /dev/null <<EOF
     fi
   done
   i=\$((highest+1))
-  solana-keygen new -o id\$i.json
-  solana address -k id\$i.json
   echo '#!/bin/bash' > mine\$i.sh
   echo "while true; do" >> mine\$i.sh
   echo "  echo "Mining \$i starting..."" >> mine\$i.sh
-  echo "  ore --rpc https://api.mainnet-beta.solana.com --keypair ~/ore/id\$i.json --priority-fee 10000 mine --threads 4" >> mine\$i.sh
+  echo "  ore --rpc https://api.mainnet-beta.solana.com --keypair ${INSTALLATION_DIR}/id.json --priority-fee 10000 mine --threads 4" >> mine\$i.sh
   echo "  echo "Mining \$i finished."" >> mine\$i.sh
   echo "done" >> mine\$i.sh
   chmod ug+x mine\$i.sh
