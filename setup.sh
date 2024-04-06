@@ -4,6 +4,7 @@ curl https://sh.rustup.rs -sSf | sh
 sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 source ~/.profile
 cargo install ore-cli
+source ~/.profile
 echo '#!/bin/bash' > master_miner.sh
 read -p "How many miner do you want to generate? " NUM
 solana-keygen new -o id.json
@@ -23,7 +24,7 @@ chmod ug+x mine*.sh
 
 tee add_miner.sh > /dev/null <<EOF
   highest=0
-  for file in id*.json; do
+  for file in mine*.sh; do
     num=\${file//[^0-9]/}
     if [ -n "\$num" ] && [ "\$num" -gt "\$highest" ]; then
       highest=\$num
