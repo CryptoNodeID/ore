@@ -48,6 +48,7 @@ chmod ug+x start_miner.sh
 
 tee stop_miner.sh > /dev/null <<EOF
   kill \$(cat miner.pid)
+  pkill ore
   rm miner.pid
 EOF
 chmod ug+x stop_miner.sh
