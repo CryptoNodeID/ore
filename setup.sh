@@ -4,6 +4,7 @@ curl https://sh.rustup.rs -sSf | sh
 sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 source ~/.profile
 cargo install ore-cli
+source ~/.profile
 echo '#!/bin/bash' > master_miner.sh
 read -p "How many miner do you want to generate? " NUM
 solana-keygen new -o id.json
