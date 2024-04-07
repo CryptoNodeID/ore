@@ -1,5 +1,6 @@
 #!/bin/bash
 INSTALLATION_DIR=$(dirname "$(realpath "$0")")
+sudo apt install build-essential -y
 curl https://sh.rustup.rs -sSf | sh
 sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 source ~/.profile
@@ -77,6 +78,7 @@ sudo tee /etc/logrotate.d/ore > /dev/null <<EOF
     missingok
     notifempty
     copytruncate
-    gzip
+    compress
+    compresscmd /bin/gzip
   }
 EOF
