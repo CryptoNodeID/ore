@@ -71,6 +71,18 @@ tee check_rewards.sh > /dev/null <<EOF
 EOF
 chmod ug+x check_rewards.sh
 
+tee claim_rewards.sh > /dev/null <<EOF
+  for key in id*.json; do
+    rewards=\$(ore --keypair ${INSTALLATION_DIR}/\$key rewards | tr -dc '0-9.')
+    echo \$rewards
+    if [ "\$rewards" \> "0.01" ]; then
+      echo "Claiming \$key: " >> claim_rewards.log
+      ore --rpc https://api.mainnet-beta.solana.com --keypair ${INSTALLATION_DIR}/\$key --priority-fee 50000 claim >> claim_rewards.log &
+    fi
+  done
+EOF
+chmod ug+x claim_rewards.sh
+
 sudo tee /etc/logrotate.d/ore > /dev/null <<EOF
   $INSTALLATION_DIR/miner.log {
     rotate 5
