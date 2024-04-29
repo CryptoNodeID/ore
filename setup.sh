@@ -13,6 +13,7 @@ solana address -k id.json
 for ((i=1; i<=$NUM; i++))
 do
   tee mine$i.sh > /dev/null <<EOF
+  #!/bin/bash
   while true; do
     echo "Mining $i starting..."
     ore --rpc https://api.mainnet-beta.solana.com --keypair ${INSTALLATION_DIR}/id.json --priority-fee 1000 mine --threads 4
@@ -72,16 +73,35 @@ EOF
 chmod ug+x check_rewards.sh
 
 tee claim_rewards.sh > /dev/null <<EOF
+while true; do
   for key in id*.json; do
     rewards=\$(ore --keypair ${INSTALLATION_DIR}/\$key rewards | tr -dc '0-9.')
-    echo \$rewards
+    echo "Claimable \$key: \$rewards" >> claim_rewards.log
     if [ "\$rewards" \> "0.01" ]; then
       echo "Claiming \$key: " >> claim_rewards.log
       ore --rpc https://api.mainnet-beta.solana.com --keypair ${INSTALLATION_DIR}/\$key --priority-fee 50000 claim >> claim_rewards.log &
     fi
   done
+  sleep 300
+done
 EOF
 chmod ug+x claim_rewards.sh
+
+tee pool_rewards.sh > /dev/null <<EOF
+dest='INPUT_YOUR_ADDRESS_HERE'
+while true; do
+  for key in id*.json; do
+    amt=\$(spl-token balance oreoN2tQbHXVaZsr3pf66A48miqcBXCDJozganhEJgz --owner=${INSTALLATION_DIR}/\$key | tr -dc '0-9.')
+    echo "Spendable \$key: \$amt" >> pool_rewards.log
+    if [ "\$amt" \> "0.01" ]; then
+      echo "Sending \${amt} from \$key: " >> pool_rewards.log
+      spl-token transfer oreoN2tQbHXVaZsr3pf66A48miqcBXCDJozganhEJgz \${amt} --owner=${INSTALLATION_DIR}/\$key \${dest} --fund-recipient --no-wait >> pool_rewards.log &
+    fi
+  done
+  sleep 300
+done
+EOF
+chmod ug+x pool_rewards.sh
 
 sudo tee /etc/logrotate.d/ore > /dev/null <<EOF
   $INSTALLATION_DIR/miner.log {
